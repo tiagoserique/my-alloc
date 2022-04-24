@@ -45,10 +45,10 @@ int main() {
 	imprimeMapa();
 	fflush(stdout);
 
-	// a = alocaMem(240);
+	a = alocaMem(240);
 
-	// imprimeMapa();
-	// fflush(stdout);
+	imprimeMapa();
+	fflush(stdout);
 
 	c = (long int *) alocaMem(50);
 	imprimeMapa();
@@ -59,6 +59,10 @@ int main() {
 	fflush(stdout);
 
 	liberaMem(b);
+	imprimeMapa();
+	fflush(stdout);
+
+	liberaMem(a);
 	imprimeMapa();
 	fflush(stdout);
 
@@ -120,73 +124,79 @@ int liberaMem(void* bloco){
 //    para um novo bloco usando a syscall brk,
 //    indica que o bloco está ocupado e
 //    retorna o endereço inicial do bloco.
-void *alocaMem(int num_bytes){
-	long int *endereco;
-	
-	endereco = sbrk(8);
-	*endereco = 1;
-
-	endereco = sbrk(8);
-	*endereco = num_bytes;
-	
-	endereco = (void *)endereco;
-	endereco = sbrk(num_bytes);
-	
-	return endereco;
-}
-
-
 // void *alocaMem(int num_bytes){
-// 	long int *inicio_busca = busca_anterior;
-// 	void *topo_heap = sbrk(0);
-
-// 	long int *busca_atual = busca_anterior;
-
-
-
-// 	// TODO: Fazer loop para percorrer a lista duas vezes
-// 		// TODO: Fazer loop para percorrer nos da lista
-// 			// se o bloco estiver livre
-// 			if ( busca_atual[0] == 0 ){
-// 				// se o tamanho do bloco for maior que numero de bytes + 16
-// 				// garante que nao vai ter um bloco de tamanho 0 na heap
-// 				// parte o bloco grande em menores
-// 				if ( busca_atual[1] > num_bytes + 16 ){
-// 					long int bloco_atual_tam = busca_atual[1];
-// 					busca_atual[0] = 1;
-// 					busca_atual[1] = num_bytes;
-
-// 					long int *novo_bloco = (void *)busca_atual + 16 + num_bytes;
-// 					novo_bloco[0] = 0;
-// 					novo_bloco[1] = bloco_atual_tam - num_bytes - 16;
-
-// 					return (void *)busca_atual + 16;
-// 				}
-// 				// se o tamanho do bloco for maior ou igual ao numero de bytes
-// 				// reserva o bloco inteiro, mesmo se passar do valor de num_bytes
-// 				else if ( busca_atual[1] >= num_bytes ){
-// 					busca_atual[0] = 1;
-
-// 					return (void *)busca_atual + 16;
-// 				}
-// 			}
-// 		// 
-// 	// 
-
-// 	// atribuicao de dados para o blooco de memoria achado ou alocado
-// 	long int *gerenciador;
+// 	long int *endereco;
 	
-// 	gerenciador = (long int *)sbrk(8);
-// 	*gerenciador = 1;
+// 	endereco = sbrk(8);
+// 	*endereco = 1;
 
-// 	gerenciador = (long int *)sbrk(8);
-// 	*gerenciador = num_bytes;
+// 	endereco = sbrk(8);
+// 	*endereco = num_bytes;
 	
-// 	void *endereco;
+// 	endereco = (void *)endereco;
 // 	endereco = sbrk(num_bytes);
 	
 // 	return endereco;
 // }
+
+void *alocaMem(int num_bytes){
+	long int *inicio_busca = busca_anterior;
+	void *topo_heap = sbrk(0);
+
+	long int *busca_atual = busca_anterior;
+
+	int volta = 0;
+
+	// loop para percorrer a lista duas vezes
+	while ( volta < 2 ){
+		// loop para percorrer os nos da lista
+		while ( inicio_busca != topo_heap ){
+			// se o bloco estiver livre
+			if ( busca_atual[0] == 0 ){
+				// se o tamanho do bloco for maior que numero de bytes + 16
+				// garante que nao vai ter um bloco de tamanho 0 na heap
+				// parte o bloco grande em menores
+				if ( busca_atual[1] > num_bytes + 16 ){
+					long int bloco_atual_tam = busca_atual[1];
+					busca_atual[0] = 1;
+					busca_atual[1] = num_bytes;
+
+					long int *novo_bloco = (void *)busca_atual + 16 + num_bytes;
+					novo_bloco[0] = 0;
+					novo_bloco[1] = bloco_atual_tam - num_bytes - 16;
+
+					return (void *)busca_atual + 16;
+				}
+				// se o tamanho do bloco for maior ou igual ao numero de bytes
+				// reserva o bloco inteiro, mesmo se passar do valor de num_bytes
+				else if ( busca_atual[1] >= num_bytes ){
+					busca_atual[0] = 1;
+
+					return (void *)busca_atual + 16;
+				}
+			}
+
+			inicio_busca = (void *)inicio_busca + 16 +inicio_busca[1];
+		}
+		inicio_busca = topo_inicial_heap;
+
+		volta++;
+	} 
+
+	// atribuicao de dados para o blooco de memoria achado ou alocado
+	long int *gerenciador;
+	
+	gerenciador = (long int *)sbrk(8);
+	*gerenciador = 1;
+
+	gerenciador = (long int *)sbrk(8);
+	*gerenciador = num_bytes;
+	
+	void *endereco;
+	endereco = sbrk(num_bytes);
+	
+	return endereco;
+}
 
 
 // imprime um mapa da memória da região da heap.
