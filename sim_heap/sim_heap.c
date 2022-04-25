@@ -4,8 +4,14 @@
 #include <unistd.h>
 
 
+
 /*================================== HEADERS =================================*/
 
+extern void _iniciaAlocador();
+extern void _finalizaAlocador();
+extern int _liberaMem(void *bloco);
+extern void _alocaMem(int num_bytes);
+extern void _imprimeMapa();
 void iniciaAlocador();
 void finalizaAlocador();
 int liberaMem(void* bloco);
@@ -16,8 +22,8 @@ void imprimeMapa();
 /*============================= VARIAVES GLOBAIS =============================*/
 
 
-void *topo_inicial_heap;
-void *busca_anterior;
+extern void *topo_inicial_heap;
+extern void *busca_anterior;
 
 
 /*==================================== MAIN ==================================*/
@@ -27,7 +33,8 @@ int main() {
 	long int *a, *b, *c;
 
 	printf("Trabalho de SB\n");
-	iniciaAlocador();
+	//iniciaAlocador();
+	_iniciaAlocador();
 
 	imprimeMapa();
 	fflush(stdout);
@@ -66,7 +73,8 @@ int main() {
 	imprimeMapa();
 	fflush(stdout);
 
-	finalizaAlocador();
+	_finalizaAlocador();
+	//finalizaAlocador();
 }
 
 
