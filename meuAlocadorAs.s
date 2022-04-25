@@ -45,17 +45,84 @@ _finalizaAlocador:
 _liberaMem:
     pushq %rbp
     movq %rsp, %rbp
-    # 
-
+                    # 16(%rbp): bloco
     subq $32, %rsp  # aloca espaco para 4 variaveis
                     # -8(%rbp): bloco_aux
                     # -16(%rbp): ini_heap
                     # -24(%rbp): topo_heap
                     # -32(%rbp): aux
-    # movq 16(%rbp),
 
+    movq %rdi, %rax # %rax =  bloco
+    movq %rax, -8(%rbp) # bloco_aux = %rax
+
+    movq $0, -16(%rax)   # bloco_aux[-2] = 0
+    movq $0, %rax        # bloco_aux = NULL
+
+    movq topo_inicial_heap, %rax
+    movq %rax, -16(%rbp) # ini_heap = topo_inicial_heap
+
+    movq $12, %rax  # %rax = 12 para chamar sbrk()
+    movq $0, %rdi   # parametro para chamada de sbrk(0)
+    syscall         # %rax = sbrk(0)
+    movq %rax, -24(%rbp) # topo_heap = sbrk(0)
+
+loop_exterior:
+    movq -16(%rbp), %rax # %rax = ini_heap
+    movq -24(%rbp), %rbx # %rbx = topo_heap
+
+    cmp %rax, %rbx # while (ini_heap != topo_heap)
+    je fim_loop_exterior
+
+    movq 0(%rax), %rcx
+    cmp $0, %rcx # if ini_heap[0] == 0
+    jne fim_if
+
+    movq -16(%rbp), %rdx # %rdx = ini_heap
+    addq 8(%rdx), %rdx   # %rdx += ini_heap[1]
+    addq $16, %rdx       # %rdx += 16
+    movq %rdx, -32(%rbp) # aux = ini_heap + ini_heap[1] + 16
+
+loop_interior:
+    movq -32(%rbp), %rax # %rax = aux
+    movq 0(%rax), %rbx
+    movq $0, %r10
+    cmp %rbx, %r10     # while (aux[0] == 0)
+    jne fim_loop_interior
+    movq -24(%rbp), %rbx # %rbx = topo_heap
+    cmp %rax, %rbx      # while (aux != topo_heap)
+    je fim_loop_interior
+
+    movq -16(%rbp), %rax # %rax = ini_heap
+    movq 8(%rax), %rax   # %rax = ini_heap[1]
+    movq -32(%rbp), %rbx # %rbx = aux
+    addq 8(%rbx), %rax   # %rax += aux[1]
+    addq $16, %rax       # %rax += 16
+    movq -16(%rbp), %rcx # %rcx = ini_heap
+    movq %rax, 8(%rcx)   # ini_heap[1] = %rax
+
+                         # %rbx = aux
+    addq 8(%rbx), %rbx   # %rbx += aux[1]
+    addq $16, %rbx       # %rbx += 16
+    movq %rbx, -32(%rbp) # aux = %rbx
+
+    jmp loop_interior
+fim_loop_interior:
+fim_if:
+
+    movq -16(%rbp), %rax # %rax = ini_heap
+    addq 8(%rax), %rax   # %rax += ini_heap[1]
+    addq $16, %rax       # %rax += 16
+    movq %rax, -16(%rbp) # ini_heap = %rax
+    
+    jmp loop_exterior
+fim_loop_exterior:
+
+    addq $32, %rsp  # desaloca espaco para 4 variaveis
     popq %rbp
     ret
+
+
+
 
 
 .globl _imprimeMapa
@@ -113,13 +180,13 @@ _imprimeMapa:
             #   bloco = '+';
             movq bloco_ocupado, %r13   # %r13 = '+'
             
-            jmp fim_if
+            jmp fim_if2
         # 	else
         else:
 
             #   bloco = '-';
             movq bloco_livre, %r13     # %r13 = '-'
-        fim_if:
+        fim_if2:
             
 
         # 	for (int i = 0; i < heap[1]; i++)

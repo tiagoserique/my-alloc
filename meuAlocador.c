@@ -48,7 +48,8 @@ int main() {
 	_imprimeMapa();
 	// fflush(stdout);
 
-	liberaMem(a);
+	_liberaMem(a);
+	//liberaMem(a);
 	_imprimeMapa();
 	// // fflush(stdout);
 
@@ -61,15 +62,18 @@ int main() {
 	_imprimeMapa();
 	// // fflush(stdout);
 
-	liberaMem(b);
+	_liberaMem(b);
+	//liberaMem(b);
 	_imprimeMapa();
 	// fflush(stdout);
 
-	liberaMem(c);
+	_liberaMem(c);
+	//liberaMem(c);
 	_imprimeMapa();
 	// fflush(stdout);
 
-	liberaMem(a);
+	_liberaMem(a);
+	//liberaMem(a);
 	_imprimeMapa();
 	// fflush(stdout);
 
