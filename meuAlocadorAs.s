@@ -45,7 +45,7 @@ _finalizaAlocador:
 _liberaMem:
     pushq %rbp
     movq %rsp, %rbp
-                    # 16(%rbp): bloco
+                    # %rdi: bloco
     subq $32, %rsp  # aloca espaco para 4 variaveis
                     # -8(%rbp): bloco_aux
                     # -16(%rbp): ini_heap
@@ -118,11 +118,47 @@ fim_if:
 fim_loop_exterior:
 
     addq $32, %rsp  # desaloca espaco para 4 variaveis
+    
+    movq $1, %rax   # return 1
     popq %rbp
     ret
 
+.globl _alocaMem
+_alocaMem:
+    pushq %rbp      # empilha %rbp
+    movq %rsp, %rbp # %rbp = %rsp
+
+                    # %rdi = num_bytes
+    subq $64, %rsp  # aloca espaco para 8 variaveis
+                    #  -8(%rbp): inicio_busca
+                    # -16(%rbp): topo_heap
+                    # -24(%rbp): busca_atual
+                    # -32(%rbp): volta
+                    # -40(%rbp): bloco_atual_tam
+                    # -48(%rbp): novo_bloco
+                    # -56(%rbp): gerenciador
+                    # -64(%rbp): endereco
+
+    movq busca_anterior, %rbx
+    movq %rbx, -8(%rbp)  # inicio_busca = busca_anterior
+
+    movq $12, %rax  # %rax = 12 para chamar sbrk()
+    movq $0, %rdi   # parametro para chamada de sbrk(0)
+    syscall         # %rax = sbrk(0)
+    movq %rax, -16(%rbp) # topo_heap = sbrk(0)
+
+    movq %rbx, -24(%rbp) # busca_atual = busca_anterior
+
+    movq $0, -32(%rbp)   # volta = 0
+
+    # TODO: while
 
 
+
+    movq -64(%rbp), %rax # return endereco
+    addq $64, %rsp  # desaloca espaco para 7 variaveis
+    popq %rbp
+    ret
 
 
 .globl _imprimeMapa
