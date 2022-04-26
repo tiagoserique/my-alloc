@@ -192,7 +192,7 @@ _alocaMem:
                 # if ( inicio_busca[1] > num_bytes + 16 ){
                 movq -8(%rbp), %r14         # %r14 = -8(%rbp) [long int *inicio_busca]
                 movq 8(%r14), %r14          # %r14 = 8(%r14) [long int inicio_busca[1]]
-                addq $16, %r15              # %r15 = 16
+                movq $16, %r15              # %r15 = 16
                 addq %rdi, %r15             # %r15 = %rdi [num_bytes] + 16 
                 cmp %r15, %r14
                 jle else_if3
@@ -210,6 +210,7 @@ _alocaMem:
 			        # inicio_busca[1] = num_bytes;
                     movq -8(%rbp), %r14         # %r14 = -8(%rbp) [long int *inicio_busca]
                     movq %rdi, 8(%r14)          # 8(%r14) [inicio_busca[1]] = %rdi [num_bytes]
+
 
 			        # long int *novo_bloco = (void *)inicio_busca + 16 + num_bytes;
                     movq -8(%rbp), %r14         # %r14 = -8(%rbp) [long int *inicio_busca]
