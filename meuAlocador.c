@@ -10,7 +10,7 @@
 extern void _iniciaAlocador();
 extern void _finalizaAlocador();
 extern int _liberaMem(void *bloco);
-extern void _alocaMem(int num_bytes);
+extern void *_alocaMem(int num_bytes);
 extern void _imprimeMapa();
 void iniciaAlocador();
 void finalizaAlocador();

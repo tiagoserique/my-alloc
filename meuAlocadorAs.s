@@ -139,6 +139,8 @@ _alocaMem:
                     # -56(%rbp): gerenciador
                     # -64(%rbp): endereco
 
+    movq %rdi, %r11 # intermediario para uso depois
+
     movq busca_anterior, %rbx
     movq %rbx, -8(%rbp)  # inicio_busca = busca_anterior
 
@@ -153,9 +155,36 @@ _alocaMem:
 
     # TODO: while
 
+    movq $12, %rax  # %rax = 12 para chamar sbrk()
+    movq $0, %rdi   # parametro para chamada de sbrk(0)
+    syscall         # %rax = sbrk(0)
+    addq $8, %rax   # %rax += 8
+    movq %rax, %rdi # parametro para chamada de brk(%rax + 8)
+    movq $12, %rax  # %rax = 12 para chamar brk()
+    syscall         # %rax = sbrk(8)
 
+    movq %rax, -56(%rbp) # gerenciador = %rax
 
-    movq -64(%rbp), %rax # return endereco
+    movq $1, (%rax) # *gerenciador = 1
+
+    # %rax eh o endereco de brk
+    movq %rax, %rdi
+    addq $8, %rdi  # parametro para chamada de brk(%rdi + 8)
+    movq $12, %rax # %rax = 12 para chamar brk()
+    syscall        # %rax = sbrk(8)
+    movq %rax, -56(%rbp) # gerenciador = %rax
+
+    movq %rax, %rbx
+    movq %r11, (%rbx) # *gerenciador = num_bytes
+
+    # %rax eh o endereco de brk
+    movq %rax, %rdi
+    addq %r11, %rdi # %rdi += num_bytes
+    movq $12, %rax  # %rax = 12 para chamar brk()
+    syscall         # %rax = sbrk(num_bytes)
+    movq %rax, -64(%rbp) # endereco = %rax
+    # return %rax (endereco)
+
     addq $64, %rsp  # desaloca espaco para 7 variaveis
     popq %rbp
     ret
