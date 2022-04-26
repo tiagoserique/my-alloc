@@ -32,7 +32,6 @@ extern void *busca_anterior;
 int main() {
 	long int *a, *b, *c;
 
-	printf("Trabalho de SB\n");
 	//iniciaAlocador();
 	_iniciaAlocador();
 
@@ -40,11 +39,11 @@ int main() {
 	// fflush(stdout);
 
 	// a = (long int *) alocaMem(240);
-	a = (long int *) alocaMem(50);
+	a = (long int *) _alocaMem(50);
 	_imprimeMapa();
 	// fflush(stdout);
 
-	b = alocaMem(50);
+	b = _alocaMem(50);
 	_imprimeMapa();
 	// fflush(stdout);
 
@@ -53,12 +52,12 @@ int main() {
 	_imprimeMapa();
 	// // fflush(stdout);
 
-	a = alocaMem(240);
+	a = _alocaMem(240);
 
 	_imprimeMapa();
 	// // fflush(stdout);
 
-	c = (long int *) alocaMem(50);
+	c = (long int *) _alocaMem(50);
 	_imprimeMapa();
 	// // fflush(stdout);
 
@@ -89,6 +88,7 @@ int main() {
 // corrente da heap e o armazena em uma
 // variável global, topo_inicial_heap.
 void iniciaAlocador(){
+	printf("Trabalho de SB\n");
 	topo_inicial_heap = sbrk(0);
 	busca_anterior = topo_inicial_heap;                                                                               
 }
@@ -98,6 +98,7 @@ void iniciaAlocador(){
 // original da heap contido em topo_inicial_heap.
 void finalizaAlocador(){
 	brk(topo_inicial_heap);
+	busca_anterior = NULL;
 }
 
 
@@ -155,50 +156,54 @@ void *alocaMem(int num_bytes){
 	long int *inicio_busca = busca_anterior;
 	void *topo_heap = sbrk(0);
 
-	long int *busca_atual = busca_anterior;
+	long int *fim_busca = topo_heap;
 
 	int volta = 0;
 
 	// loop para percorrer a lista duas vezes
 	while ( volta < 2 ){
 		// loop para percorrer os nos da lista
-		while ( inicio_busca != topo_heap ){
+		while ( inicio_busca != fim_busca ){
 			// se o bloco estiver livre
-			if ( busca_atual[0] == 0 ){
+			if ( inicio_busca[0] == 0 ){
 				// se o tamanho do bloco for maior que numero de bytes + 16
 				// garante que nao vai ter um bloco de tamanho 0 na heap
 				// parte o bloco grande em menores
-				if ( busca_atual[1] > num_bytes + 16 ){
-					long int bloco_atual_tam = busca_atual[1];
-					busca_atual[0] = 1;
-					busca_atual[1] = num_bytes;
+				if ( inicio_busca[1] > num_bytes + 16 ){
+					long int bloco_atual_tam = inicio_busca[1];
+					inicio_busca[0] = 1;
+					inicio_busca[1] = num_bytes;
 
-					long int *novo_bloco = (void *)busca_atual + 16 + num_bytes;
+					long int *novo_bloco = (void *)inicio_busca + 16 + num_bytes;
 					novo_bloco[0] = 0;
 					novo_bloco[1] = bloco_atual_tam - num_bytes - 16;
 
-					return (void *)busca_atual + 16;
+					busca_anterior = inicio_busca;
+
+					return (void *)inicio_busca + 16;
 				}
 				// se o tamanho do bloco for maior ou igual ao numero de bytes
 				// reserva o bloco inteiro, mesmo se passar do valor de num_bytes
-				else if ( busca_atual[1] >= num_bytes ){
-					busca_atual[0] = 1;
+				else if ( inicio_busca[1] >= num_bytes ){
+					inicio_busca[0] = 1;
 
-					return (void *)busca_atual + 16;
+					busca_anterior = inicio_busca;
+
+					return (void *)inicio_busca + 16;
 				}
 			}
 
-			inicio_busca = (void *)inicio_busca + 16 +inicio_busca[1];
+			inicio_busca = (void *)inicio_busca + 16 + inicio_busca[1];
 		}
 		inicio_busca = topo_inicial_heap;
+
+		fim_busca = busca_anterior;
 
 		volta++;
 	} 
 
 	// atribuicao de dados para o blooco de memoria achado ou alocado
-	long int *gerenciador;
-	
-	gerenciador = (long int *)sbrk(8);
+	long int *gerenciador = (long int *)sbrk(8);
 	*gerenciador = 1;
 
 	gerenciador = (long int *)sbrk(8);
@@ -207,6 +212,8 @@ void *alocaMem(int num_bytes){
 	void *endereco;
 	endereco = sbrk(num_bytes);
 	
+	busca_anterior = endereco + num_bytes;
+
 	return endereco;
 }
 
