@@ -1,6 +1,11 @@
+#include <string.h>
 #include "meuAlocador.h"
 
 
+/*==================================== MAIN ==================================*/
+
+
+// exemplo do livro
 int main(){
 	void *a, *b;
 

@@ -14,8 +14,8 @@
 .section .text
 
 
-.globl _iniciaAlocador
-_iniciaAlocador:
+.globl iniciaAlocador
+iniciaAlocador:
     pushq %rbp
     movq %rsp, %rbp
 
@@ -36,8 +36,8 @@ _iniciaAlocador:
     ret
 
 
-.globl _finalizaAlocador
-_finalizaAlocador:
+.globl finalizaAlocador
+finalizaAlocador:
     pushq %rbp
     movq %rsp, %rbp
 
@@ -53,8 +53,8 @@ _finalizaAlocador:
     ret
 
 
-.globl _liberaMem
-_liberaMem:
+.globl liberaMem
+liberaMem:
     pushq %rbp
     movq %rsp, %rbp
                     # %rdi: bloco
@@ -136,8 +136,8 @@ fim_loop_exterior:
     ret
 
 
-.globl _alocaMem
-_alocaMem:
+.globl alocaMem
+alocaMem:
     pushq %rbp          # empilha %rbp
     movq %rsp, %rbp     # %rbp = %rsp
 
@@ -326,8 +326,8 @@ _alocaMem:
     ret
 
 
-.globl _imprimeMapa
-_imprimeMapa:
+.globl imprimeMapa
+imprimeMapa:
     pushq %rbp          # empilha %rbp
     movq %rsp, %rbp     # %rbp = %rsp
 

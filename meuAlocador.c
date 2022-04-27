@@ -3,153 +3,29 @@
 #include <string.h>
 #include <unistd.h>
 
-
+#include "meuAlocador.h"
 
 /*================================== HEADERS =================================*/
 
-extern void _iniciaAlocador();
-extern void _finalizaAlocador();
-extern int _liberaMem(void *bloco);
-extern void *_alocaMem(int num_bytes);
-extern void _imprimeMapa();
-void iniciaAlocador();
-void finalizaAlocador();
-int liberaMem(void* bloco);
-void* alocaMem(int num_bytes);
-void imprimeMapa();
+// extern void _iniciaAlocador();
+// extern void _finalizaAlocador();
+// extern int _liberaMem(void *bloco);
+// extern void *_alocaMem(int num_bytes);
+// extern void _imprimeMapa();
+// void iniciaAlocador();
+// void finalizaAlocador();
+// int liberaMem(void* bloco);
+// void* alocaMem(int num_bytes);
+// void imprimeMapa();
 
 
 /*============================= VARIAVES GLOBAIS =============================*/
 
 
-extern void *topo_inicial_heap;
-extern void *busca_anterior;
+void *topo_inicial_heap;
+void *busca_anterior;
 
 
-/*==================================== MAIN ==================================*/
-
-
-// int main() {
-// 	long int *a, *b, *c;
-
-// 	//iniciaAlocador();
-// 	_iniciaAlocador();
-
-// 	_imprimeMapa();
-// 	// fflush(stdout);
-
-// 	// a = (long int *) alocaMem(240);
-// 	a = (long int *) _alocaMem(50);
-// 	_imprimeMapa();
-// 	// fflush(stdout);
-
-// 	b = _alocaMem(50);
-// 	_imprimeMapa();
-// 	// fflush(stdout);
-
-// 	_liberaMem(a);
-// 	//liberaMem(a);
-// 	_imprimeMapa();
-// 	// // fflush(stdout);
-
-// 	a = _alocaMem(240);
-
-// 	_imprimeMapa();
-// 	// // fflush(stdout);
-
-// 	c = (long int *) _alocaMem(50);
-// 	_imprimeMapa();
-// 	// // fflush(stdout);
-
-// 	_liberaMem(b);
-// 	//liberaMem(b);
-// 	_imprimeMapa();
-// 	// fflush(stdout);
-
-// 	_liberaMem(c);
-// 	//liberaMem(c);
-// 	_imprimeMapa();
-// 	// fflush(stdout);
-
-// 	_liberaMem(a);
-// 	//liberaMem(a);
-// 	_imprimeMapa();
-// 	// fflush(stdout);
-
-// 	_finalizaAlocador();
-// 	//finalizaAlocador();
-// }
-
-// int main(){
-// 	void *a,*b ,*c, *d, *e, *f;
-
-//     //Teste noia
-//     int *coisa[50];
-
-// 	iniciaAlocador();
-
-//     for (int j = 0; j < 5; ++j){
-//         //coisa = (int**) alocaMem(50*sizeof(int*));
-//         for (int i = 0; i < 50; ++i){
-//             coisa[i] = (int*) alocaMem(i*sizeof(int));   
-//             printf("aqui tem %i \n" ,i);
-//             fflush(stdout);  
-//             imprimeMapa();
-//         }
-
-//         for (int i = 0; i < 50; i+= 2){
-//             liberaMem(coisa[i]);   
-//             printf("aqui liberamos %i \n" ,i);
-//             fflush(stdout);  
-//             imprimeMapa();
-//         }
-
-//         for (int i = 1; i < 50; i+= 2){
-//             liberaMem(coisa[i]);   
-//             printf("aqui liberamos %i \n" ,i);
-//             fflush(stdout);  
-//             imprimeMapa();
-//         }
-//     }
-// }
-
-int main(){
-	void *a, *b;
-	
-	// iniciaAlocador();
-	_iniciaAlocador();
-	
-	// imprimeMapa();
-	_imprimeMapa();
-	
-	// a = alocaMem(240);
-	a = _alocaMem(240);
-	
-	// imprimeMapa();
-	_imprimeMapa();
-	
-	// b = alocaMem(50);
-	b = _alocaMem(50);
-	
-	// imprimeMapa();
-	_imprimeMapa();
-	
-	// liberaMem(a);
-	_liberaMem(a);
-	
-	// imprimeMapa();
-	_imprimeMapa();
-	
-	// a = alocaMem(50);
-	a = _alocaMem(50);
-	
-	// imprimeMapa();
-	_imprimeMapa();
-
-	// finalizaAlocador();
-	_finalizaAlocador();
-
-}
 /*================================== FUNCOES =================================*/
 
 
@@ -206,21 +82,6 @@ int liberaMem(void* bloco){
 //    para um novo bloco usando a syscall brk,
 //    indica que o bloco está ocupado e
 //    retorna o endereço inicial do bloco.
-// void *alocaMem(int num_bytes){
-// 	long int *endereco;
-	
-// 	endereco = sbrk(8);
-// 	*endereco = 1;
-
-// 	endereco = sbrk(8);
-// 	*endereco = num_bytes;
-	
-// 	endereco = (void *)endereco;
-// 	endereco = sbrk(num_bytes);
-	
-// 	return endereco;
-// }
-
 void *alocaMem(int num_bytes){
 	long int *inicio_busca = busca_anterior;
 	void *topo_heap = sbrk(0);
