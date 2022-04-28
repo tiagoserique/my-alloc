@@ -12,17 +12,31 @@ int main(){
 	iniciaAlocador();
 
 	a = alocaMem(100);
+
+	imprimeMapa();
+
 	b = alocaMem(200);
+
+	imprimeMapa();
 
 	strcpy(a, "Preenchimento de Vetor");
 	strcpy(b, a);
 
 	liberaMem(a);
+
+	imprimeMapa();
+
 	liberaMem(b);
+
+	imprimeMapa();
 
 	a = alocaMem(50);
 
+	imprimeMapa();
+	
 	liberaMem(a);
+
+	imprimeMapa();
 
 	finalizaAlocador();
 }

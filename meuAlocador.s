@@ -16,8 +16,8 @@
 
 .globl iniciaAlocador
 iniciaAlocador:
-    pushq %rbp
-    movq %rsp, %rbp
+    pushq %rbp          # empilha o rbp
+    movq %rsp, %rbp     # %rbp = %rsp
 
     # printf("Trabalho de SB\n");
     movq $string_inicial, %rdi      # %rdi = $string_inicial
@@ -38,8 +38,8 @@ iniciaAlocador:
 
 .globl finalizaAlocador
 finalizaAlocador:
-    pushq %rbp
-    movq %rsp, %rbp
+    pushq %rbp          # empilha o rbp
+    movq %rsp, %rbp     # %rbp = %rsp
 
     # brk(topo_inicial_heap);
     movq $12, %rax                  # %rax = 12 para chamar sbrk()
@@ -55,8 +55,9 @@ finalizaAlocador:
 
 .globl liberaMem
 liberaMem:
-    pushq %rbp
-    movq %rsp, %rbp
+    pushq %rbp          # empilha o rbp
+    movq %rsp, %rbp     # %rbp = %rsp
+
                     # %rdi: bloco
     subq $32, %rsp  # aloca espaco para 4 variaveis
                     # -8(%rbp): bloco_aux
@@ -64,70 +65,87 @@ liberaMem:
                     # -24(%rbp): topo_heap
                     # -32(%rbp): aux
 
-    movq %rdi, %rax # %rax =  bloco
-    movq %rax, -8(%rbp) # bloco_aux = %rax
+	# long int *bloco_aux = bloco;
+    movq %rdi, -8(%rbp)     # -8(%rbp) [bloco_aux] = %rdi [bloco]
 
-    movq $0, -16(%rax)   # bloco_aux[-2] = 0
-    movq $0, %rax        # bloco_aux = NULL
+	# bloco_aux[-2] = 0;
+    movq -8(%rbp), %rax     # %rax = -8(%rbp) [bloco_aux]
+    movq $0, -16(%rax)      # -16(%rax) [bloco_aux[-2]] = 0
 
+	# bloco_aux = NULL;
+    movq -8(%rbp), %rax     # %rax = -8(%rbp) [bloco_aux]
+    movq $0, (%rax)
+
+	# long int *ini_heap = (long int *)topo_inicial_heap;
     movq topo_inicial_heap, %rax
-    movq %rax, -16(%rbp) # ini_heap = topo_inicial_heap
+    movq %rax, -16(%rbp)       # -16(%rbp) [ini_heap] = %rax [topo_inicial_heap]
 
+	# long int *topo_heap = (long int *)sbrk(0);
     movq $12, %rax  # %rax = 12 para chamar sbrk()
     movq $0, %rdi   # parametro para chamada de sbrk(0)
     syscall         # %rax = sbrk(0)
-    movq %rax, -24(%rbp) # topo_heap = sbrk(0)
+    movq %rax, -24(%rbp)        # -24(%rbp) [topo_heap] = sbrk(0)
 
-loop_exterior:
-    movq -16(%rbp), %rax # %rax = ini_heap
-    movq -24(%rbp), %rbx # %rbx = topo_heap
-
-    cmp %rax, %rbx # while (ini_heap != topo_heap)
+	# while ( ini_heap != topo_heap ){
+    loop_exterior:
+    movq -16(%rbp), %rax        # %rax = -16(%rbp) [ini_heap]
+    movq -24(%rbp), %rbx        # %rbx = -24(%rbp) [topo_heap]
+    cmp %rbx, %rax
     je fim_loop_exterior
 
-    movq 0(%rax), %rcx
-    cmp $0, %rcx # if ini_heap[0] == 0
-    jne fim_if1
+		# if ( ini_heap[0] == 0 ){
+        movq -16(%rbp), %rax        # %rax = -16(%rbp) [ini_heap]
+        movq (%rax), %rax           # %rax = ini_heap[0]
+        cmp $0, %rax
+        jne fim_if1
 
-    movq -16(%rbp), %rdx # %rdx = ini_heap
-    addq 8(%rdx), %rdx   # %rdx += ini_heap[1]
-    addq $16, %rdx       # %rdx += 16
-    movq %rdx, -32(%rbp) # aux = ini_heap + ini_heap[1] + 16
+            # long int *aux = (void *)ini_heap + 16 + ini_heap[1];
+            movq -16(%rbp), %rax        # %rax = -16(%rbp) [ini_heap]
+            addq 8(%rax), %rax          # %rax += ini_heap[1]
+            addq $16, %rax              # %rax += 16
+            movq %rax, -32(%rbp)        # -32(%rbp) [aux] = ini_heap + ini_heap[1] + 16
 
-loop_interior:
-    movq -32(%rbp), %rax # %rax = aux
-    movq 0(%rax), %rbx
-    movq $0, %r10
-    cmp %rbx, %r10     # while (aux[0] == 0)
-    jne fim_loop_interior
-    movq -24(%rbp), %rbx # %rbx = topo_heap
-    cmp %rax, %rbx      # while (aux != topo_heap)
-    je fim_loop_interior
+			# busca_anterior = ini_heap;
+            movq -16(%rbp), %rax        # %rax = -16(%rbp) [ini_heap]
+            movq %rax, busca_anterior   # busca_anterior = ini_heap
 
-    movq -16(%rbp), %rax # %rax = ini_heap
-    movq 8(%rax), %rax   # %rax = ini_heap[1]
-    movq -32(%rbp), %rbx # %rbx = aux
-    addq 8(%rbx), %rax   # %rax += aux[1]
-    addq $16, %rax       # %rax += 16
-    movq -16(%rbp), %rcx # %rcx = ini_heap
-    movq %rax, 8(%rcx)   # ini_heap[1] = %rax
+			# while ( aux[0] == 0 && aux != topo_heap ){
+            loop_interior:
+            movq -32(%rbp), %rax        # %rax = -32(%rbp) [aux]
+            movq 0(%rax), %rbx          # %rbx = aux[0]
+            cmp $0, %rbx                # se ( aux[0] == 0 )
+            jne fim_loop_interior
+            movq -24(%rbp), %rbx        # %rbx = -24(%rbp) [topo_heap]
+            cmp %rbx, %rax              # se ( aux != topo_heap )
+            je fim_loop_interior
 
-                         # %rbx = aux
-    addq 8(%rbx), %rbx   # %rbx += aux[1]
-    addq $16, %rbx       # %rbx += 16
-    movq %rbx, -32(%rbp) # aux = %rbx
+				# ini_heap[1] = ini_heap[1] + 16 + aux[1];
+                movq -16(%rbp), %rax    # %rax = -16(%rbp) [ini_heap]
+                movq 8(%rax), %rax      # %rax = ini_heap[1]
+                movq -32(%rbp), %rbx    # %rbx = -32(%rbp) [aux]
+                addq 8(%rbx), %rax      # %rax = ini_heap[1] + aux[1]
+                addq $16, %rax          # %rax += 16
+                movq -16(%rbp), %rbx    # %rbx = -16(%rbp) [ini_heap]
+                movq %rax, 8(%rbx)      # ini_heap[1] = %rax
 
-    jmp loop_interior
-fim_loop_interior:
-fim_if1:
+				# aux = (void *)aux + 16 + aux[1]; 
+                movq -32(%rbp), %rax        # %rax = -32(%rbp) [aux]
+                addq 8(%rax), %rax          # %rax += aux[1]
+                addq $16, %rax              # %rax += 16
+                movq %rax, -32(%rbp)        # aux = %rbx
 
-    movq -16(%rbp), %rax # %rax = ini_heap
-    addq 8(%rax), %rax   # %rax += ini_heap[1]
-    addq $16, %rax       # %rax += 16
-    movq %rax, -16(%rbp) # ini_heap = %rax
-    
-    jmp loop_exterior
-fim_loop_exterior:
+                jmp loop_interior
+            fim_loop_interior:
+        fim_if1:
+
+		# ini_heap = (void *)ini_heap + 16 + ini_heap[1];
+        movq -16(%rbp), %rax # %rax = -16(%rbp) [ini_heap]
+        addq 8(%rax), %rax   # %rax += ini_heap[1]
+        addq $16, %rax       # %rax += 16
+        movq %rax, -16(%rbp) # -16(%rbp) [ini_heap] = %rax
+        
+        jmp loop_exterior
+    fim_loop_exterior:
 
     addq $32, %rsp  # desaloca espaco para 4 variaveis
     

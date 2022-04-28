@@ -46,7 +46,7 @@ void finalizaAlocador(){
 	busca_anterior = NULL;
 }
 
-
+// TODO: Mexer com "busca_anterior" aqui também
 // indica que o bloco está livre.
 int liberaMem(void* bloco){
 	long int *bloco_aux = bloco;
@@ -60,6 +60,8 @@ int liberaMem(void* bloco){
 
 		if ( ini_heap[0] == 0 ){
 			long int *aux = (void *)ini_heap + 16 + ini_heap[1];
+
+			busca_anterior = ini_heap;
 			
 			while ( aux[0] == 0 && aux != topo_heap ){
 				ini_heap[1] = ini_heap[1] + 16 + aux[1];
