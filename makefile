@@ -2,7 +2,7 @@
 FLAGS = -no-pie -static
 
 
-all: main1 main2 main3 main4 base
+all: main1 main2 main3 main4 base avalia worst
 
 
 # meuAlocador: meuAlocador.c meuAlocadorAs.s
@@ -41,6 +41,16 @@ base: main_4.c meuAlocador.c meuAlocador.h
 	gcc $(FLAGS) main_4.o meuAlocador.o -o base -g
 
 
+avalia: avalia.c meuAlocador.s meuAlocador.h
+	gcc -c avalia.c -g
+	as meuAlocador.s -o meuAlocador.o -g
+	gcc $(FLAGS) avalia.o meuAlocador.o -o avalia -g
+
+worst: avalia.c meuAlocadorWorstFit.s meuAlocador.h
+	gcc -c avalia.c -g
+	as meuAlocadorWorstFit.s -o meuAlocadorWorstFit.o -g
+	gcc $(FLAGS) avalia.o meuAlocadorWorstFit.o -o worst -g
+
 clean:
 	rm -rf *.o
 
@@ -48,4 +58,5 @@ clean:
 purge: clean
 	rm -rf teste*
 	rm -rf base
-	
+	rm -rf avalia
+	rm -rf worst	
